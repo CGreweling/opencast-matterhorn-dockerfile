@@ -8,7 +8,7 @@
 FROM centos:centos7
 
 # File Author / Maintainer
-MAINTAINER Lars Kiesow <lkiesow@uos.de>
+MAINTAINER Christian Greweling
 
 
 # Update the repository sources list
@@ -17,7 +17,7 @@ RUN yum -y install epel-release
 RUN yum -y update
 RUN yum -y install opencast-matterhorn16
 ADD usr-sbin-matterhorn /usr/sbin/matterhorn
-
+ADD /etc/ /etc/matterhorn/
 
 ##################### INSTALLATION END #####################
 

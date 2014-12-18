@@ -15,7 +15,7 @@ Enter credentials for Matterhorn RPM repository
 echo -n 'Username: '
 read USER
 echo -n 'Password: '
-read -s PASSWD
+read PASSWD
 echo
 
 docker_build() {
