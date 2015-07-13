@@ -15,6 +15,7 @@ MAINTAINER Christian Greweling
 ADD matterhorn.repo /etc/yum.repos.d/
 ADD matterhorn-testing.repo /etc/yum.repos.d/
 RUN yum -y install epel-release
+sed -i 's/gpgcheck = 1/gpgcheck = 0/g' /etc/yum.repos.d/epel-testing.repo
 RUN yum -y update
 RUN yum -y install opencast-matterhorn16
 ADD usr-sbin-matterhorn /usr/sbin/matterhorn
