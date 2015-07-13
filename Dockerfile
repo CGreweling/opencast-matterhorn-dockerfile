@@ -12,7 +12,8 @@ MAINTAINER Christian Greweling
 
 
 # Update the repository sources list
-ADD matterhorn*.repo /etc/yum.repos.d/
+ADD matterhorn.repo /etc/yum.repos.d/
+ADD matterhorn-testing.repo /etc/yum.repos.d/
 RUN yum -y install epel-release
 RUN yum -y update
 RUN yum -y install opencast-matterhorn16
