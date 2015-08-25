@@ -10,18 +10,38 @@ FROM centos:centos7
 # File Author / Maintainer
 MAINTAINER Christian Greweling
 
+#Create a dedicated Opencast user.
+#RUN useradd -d /opt/matterhorn opencast
+#Install some Packages
+RUN yum install -y \
+  tar \
+  git
 
-# Update the repository sources list
-ADD matterhorn*.repo /etc/yum.repos.d/
-RUN yum -y install epel-release
-RUN yum -y update
-RUN yum -y install opencast-matterhorn16
+
+#Install Opencast
+RUN mkdir /opt/matterhorn
+WORKDIR /opt/matterhorn/
+RUN git clone https://bitbucket.org/opencast-community/matterhorn.git .
+RUN git checkout develop
+
+# get repo.virtuos.uos.de for ffmpeg the repository sources list
+ADD matterhorn.repo /etc/yum.repos.d/
+ADD matterhorn-testing.repo /etc/yum.repos.d/
+# get repo for maven 3.1
+ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo /etc/yum.repos.d/epel-apache-maven.repo
+
+RUN yum update --skip broken && yum -y install epel-release
 ADD usr-sbin-matterhorn /usr/sbin/matterhorn
-ADD /etc/ /etc/matterhorn/
+#RUN yum -y install activemq
+RUN yum -y install \
+    ffmpeg \
+    activemq-dist \
+    apache-maven \
+    tesseract \
+    java-1.8.0-openjdk.x86_64 \
+    java-1.8.0-openjdk-devel.x86_64
 
-##################### INSTALLATION END #####################
-
-# Expose the default port
+#Compile Opencast
+RUN mvn clean install -DdeployTo=/opt/matterhorn/
+#Port 8080
 EXPOSE 8080
-
-CMD ["/usr/sbin/matterhorn", "--notty"]
