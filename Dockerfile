@@ -10,8 +10,6 @@ FROM centos:centos7
 # File Author / Maintainer
 MAINTAINER Christian Greweling
 
-#Create a dedicated Opencast user.
-#RUN useradd -d /opt/matterhorn opencast
 #Install some Packages
 RUN yum install -y \
   tar \
@@ -32,7 +30,7 @@ ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.rep
 
 RUN yum update --skip broken && yum -y install epel-release
 ADD usr-sbin-matterhorn /usr/sbin/matterhorn
-#RUN yum -y install activemq
+
 RUN yum -y install \
     ffmpeg \
     activemq-dist \
