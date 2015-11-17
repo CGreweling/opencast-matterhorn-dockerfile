@@ -19,21 +19,22 @@ RUN yum install -y \
 
 
 #Install Opencast
-RUN mkdir /opt/matterhorn
-WORKDIR /opt/matterhorn/
+RUN mkdir /opt/opencast
+WORKDIR /opt/opencast/
 RUN git clone https://bitbucket.org/opencast-community/matterhorn.git .
-RUN git checkout develop
+RUN git checkout r/2.1.x
 
 # get repo.virtuos.uos.de for ffmpeg the repository sources list
 ADD matterhorn.repo /etc/yum.repos.d/
 ADD matterhorn-testing.repo /etc/yum.repos.d/
-# get repo for maven 3.1
+# get repo for maven r/3.1
 ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo /etc/yum.repos.d/epel-apache-maven.repo
 
 RUN yum update --skip broken && yum -y install epel-release
 ADD usr-sbin-matterhorn /usr/sbin/matterhorn
 
 RUN yum -y install \
+    bzip2 \
     ffmpeg \
     activemq-dist \
     apache-maven \
@@ -42,6 +43,9 @@ RUN yum -y install \
     java-1.8.0-openjdk-devel.x86_64
 
 #Compile Opencast
-RUN mvn clean install -DdeployTo=/opt/matterhorn/
+RUN mvn clean install
+WORKDIR /opt/opencast/build/
+RUN mv opencast-dist-allinone-*/ /opt/opencast
+RUN chown -R opencast:opencast /opt/opencast
 #Port 8080
 EXPOSE 8080
