@@ -25,7 +25,7 @@ RUN yum install -y \
 RUN mkdir /opt/opencast
 WORKDIR /opt/opencast
 RUN git clone https://bitbucket.org/opencast-community/matterhorn.git .
-RUN git checkout develop
+RUN git checkout r/2.0.x 
 
 # get repo.virtuos.uos.de for ffmpeg the repository sources list
 ADD matterhorn.repo /etc/yum.repos.d/
