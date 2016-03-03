@@ -36,6 +36,7 @@ ADD usr-sbin-matterhorn /usr/sbin/matterhorn
 RUN yum -y install \
     bzip2 \
     ffmpeg \
+    which \
     activemq-dist \
     apache-maven \
     tesseract \
