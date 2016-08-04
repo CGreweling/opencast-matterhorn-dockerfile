@@ -5,13 +5,13 @@
 
 
 # Set the base image to centos
-FROM centos:centos7
+FROM centos:latest
 
 # File Author / Maintainer
 MAINTAINER Christian Greweling
 
 #Create a dedicated Opencast user.
-#RUN useradd -d /opt/matterhorn opencast
+RUN useradd -d /home/opencast opencast
 #Install some Packages
 RUN yum install -y \
   tar \
@@ -21,8 +21,9 @@ RUN yum install -y \
 #Install Opencast
 RUN mkdir /opt/opencast
 WORKDIR /opt/opencast/
+#ADD ../opencast/* /opt/opencast/
 RUN git clone https://bitbucket.org/opencast-community/matterhorn.git .
-RUN git checkout r/2.1.x
+RUN git checkout r/2.2.x
 
 # get repo.virtuos.uos.de for ffmpeg the repository sources list
 ADD matterhorn.repo /etc/yum.repos.d/
@@ -31,7 +32,7 @@ ADD matterhorn-testing.repo /etc/yum.repos.d/
 ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo /etc/yum.repos.d/epel-apache-maven.repo
 
 RUN yum update --skip broken && yum -y install epel-release
-ADD usr-sbin-matterhorn /usr/sbin/matterhorn
+#ADD usr-sbin-matterhorn /usr/sbin/matterhorn
 
 RUN yum -y install \
     bzip2 \
@@ -44,9 +45,8 @@ RUN yum -y install \
     java-1.8.0-openjdk-devel.x86_64
 
 #Compile Opencast
-RUN mvn clean install
-WORKDIR /opt/opencast/build/
-RUN mv opencast-dist-allinone-*/ /opt/opencast
+RUN mvn clean install -DskipTests
+#RUN mv opencast-dist-allinone-*/* /opt/opencast
 RUN chown -R opencast:opencast /opt/opencast
 #Port 8080
 EXPOSE 8080
