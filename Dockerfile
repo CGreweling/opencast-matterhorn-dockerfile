@@ -5,15 +5,16 @@
 
 
 # Set the base image to centos
-FROM centos:latest
+FROM ubuntu:latest
 
 # File Author / Maintainer
 MAINTAINER Christian Greweling
 
 #Create a dedicated Opencast user.
 RUN useradd -d /home/opencast opencast
+RUN apt-get update
 #Install some Packages
-RUN yum install -y \
+RUN apt-get install -y \
   tar \
   git
 
@@ -26,23 +27,21 @@ RUN git clone https://bitbucket.org/opencast-community/matterhorn.git .
 RUN git checkout r/2.2.x
 
 # get repo.virtuos.uos.de for ffmpeg the repository sources list
-ADD matterhorn.repo /etc/yum.repos.d/
-ADD matterhorn-testing.repo /etc/yum.repos.d/
+#ADD opencast.repo /etc/yum.repos.d/
+#ADD opencast-testing.repo /etc/yum.repos.d/
 # get repo for maven r/3.1
-ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo /etc/yum.repos.d/epel-apache-maven.repo
+#ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo /etc/yum.repos.d/epel-apache-maven.repo
 
-RUN yum update --skip broken && yum -y install epel-release
+#RUN apt-get update --skip broken && yum -y install epel-release
 #ADD usr-sbin-matterhorn /usr/sbin/matterhorn
 
-RUN yum -y install \
+RUN apt-get -y install \
     bzip2 \
     ffmpeg \
-    which \
-    activemq-dist \
-    apache-maven \
-    tesseract \
-    java-1.8.0-openjdk.x86_64 \
-    java-1.8.0-openjdk-devel.x86_64
+    activemq \
+    maven \
+    openjdk-8-jdk 
+    
 
 #Compile Opencast
 RUN mvn clean install -DskipTests
