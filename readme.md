@@ -6,6 +6,15 @@ They will clone this git repository and build a docker image called
 opencast-matterhorn.
 
 ```
-docker build -t opencast-matterhorn https://github.com/cgreweling/opencast-matterhorn-dockerfile.git
-docker run -d --name=matterhorntest -p 8080:8080 opencast-matterhorn
+edit Dockerfile
+change [your_username]:[password] to your own credentials for https://pkg.opencast.org/ .
+
+docker build -t opencast .
+docker run it --name=matterhorntest -p 8080:8080 opencast /bin/sh
+
+activemq start
+/usr/share/opencast/bin/start-opencast
+
+Open a browser:
+http://localhost:8080
 ```

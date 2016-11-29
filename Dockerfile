@@ -5,47 +5,44 @@
 
 
 # Set the base image to centos
-FROM ubuntu:latest
+FROM centos:latest
 
 # File Author / Maintainer
 MAINTAINER Christian Greweling
+RUN yum install -y \
+  tar\
+  bzip2\
+  wget
 
-#Create a dedicated Opencast user.
-RUN useradd -d /home/opencast opencast
-RUN apt-get update
-#Install some Packages
-RUN apt-get install -y \
-  tar \
-  git
+## RHEL/CentOS 7 64-Bit ##
+RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+RUN rpm -ivh epel-release-7-8.noarch.rpm
 
 
-#Install Opencast
-RUN mkdir /opt/opencast
-WORKDIR /opt/opencast/
-#ADD ../opencast/* /opt/opencast/
-RUN git clone https://bitbucket.org/opencast-community/matterhorn.git .
-RUN git checkout r/2.2.x
+#ADD Opencast Repository
+WORKDIR /etc/yum.repos.d
+RUN curl -O https://pkg.opencast.org/opencast.repo -d os=el -d version=7 -u [your_username]:[password]
+RUN yum update -y
 
-# get repo.virtuos.uos.de for ffmpeg the repository sources list
-#ADD opencast.repo /etc/yum.repos.d/
-#ADD opencast-testing.repo /etc/yum.repos.d/
-# get repo for maven r/3.1
-#ADD http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo /etc/yum.repos.d/epel-apache-maven.repo
-
-#RUN apt-get update --skip broken && yum -y install epel-release
-#ADD usr-sbin-matterhorn /usr/sbin/matterhorn
-
-RUN apt-get -y install \
-    bzip2 \
+RUN yum install -y \
     ffmpeg \
     activemq \
     maven \
-    openjdk-8-jdk 
-    
+    openjdk-8-jdk\
+    tesseract\
+    hunspell\
+    sox \
+    activemq-dist
 
-#Compile Opencast
-RUN mvn clean install -DskipTests
-#RUN mv opencast-dist-allinone-*/* /opt/opencast
-RUN chown -R opencast:opencast /opt/opencast
+# Install Opencast
+RUN yum install -y\
+    opencast22-allinone
+
+# copy activemq
+  RUN cp /usr/share/opencast/docs/scripts/activemq/activemq.xml /etc/activemq/activemq.xml
+
+# make Opencast accessable
+RUN sed -i -e 's/org.ops4j.pax.web.listening.addresses=127.0.0.1/#org.ops4j.pax.web.listening.addresses=127.0.0.1/g' /etc/opencast/custom.properties
+
 #Port 8080
 EXPOSE 8080
