@@ -1,3 +1,4 @@
+
 ############################################################
 # Dockerfile to build Matterhorn container images
 # Based on CentOS 7
@@ -9,40 +10,54 @@ FROM centos:latest
 
 # File Author / Maintainer
 MAINTAINER Christian Greweling
+
+#Create a dedicated Opencast user.
+RUN useradd -d /home/opencast opencast
+#Install some Packages
 RUN yum install -y \
-  tar\
-  bzip2\
-  wget
-
-## RHEL/CentOS 7 64-Bit ##
-RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
-RUN rpm -ivh epel-release-7-8.noarch.rpm
+  tar \
+  curl \
+  wget \
+  git
 
 
-#ADD Opencast Repository
-WORKDIR /etc/yum.repos.d
-RUN curl -O https://pkg.opencast.org/opencast.repo -d os=el -d version=7 -u [your_username]:[password]
-RUN yum update -y
+#Install Opencast
+RUN mkdir /opt/opencast
+WORKDIR /opt/opencast/
+RUN wget https://bitbucket.org/opencast-community/opencast/downloads/opencast-dist-allinone-3.3.tar.xz
+RUN tar -xf opencast-dist-allinone-3.3.tar.xz
 
-RUN yum install -y \
+
+RUN curl https://copr.fedorainfracloud.org/coprs/lkiesow/apache-activemq-dist/repo/epel-7/lkiesow-apache-activemq-dist-epel-7.repo -o /etc/yum.repos.d/lkiesow-apache-activemq-dist-epel-7.repo
+# Install Apache ActiveMQ
+RUN yum install -y activemq-dist
+
+
+RUN yum update --skip broken && yum -y install epel-release
+#ADD usr-sbin-matterhorn /usr/sbin/matterhorn
+
+RUN yum -y install \
+    bzip2 \
     ffmpeg \
-    activemq \
-    maven \
-    openjdk-8-jdk\
-    tesseract\
-    hunspell\
-    sox \
-    activemq-dist
+    which \
+    activemq-dist \
+    apache-maven \
+    tesseract \
+    java-1.8.0-openjdk.x86_64 \
+    java-1.8.0-openjdk-devel.x86_64
 
-# Install Opencast
-RUN yum install -y\
-    opencast22-allinone
+#ops
+RUN sed -i s/'org.ops4j.pax.web.listening.addresses'/'#org.ops4j.pax.web.listening.addresses'/ /opt/opencast/opencast-dist-allinone/etc/org.ops4j.pax.web.cfg
 
-# copy activemq
-  RUN cp /usr/share/opencast/docs/scripts/activemq/activemq.xml /etc/activemq/activemq.xml
 
-# make Opencast accessable
-RUN sed -i -e 's/org.ops4j.pax.web.listening.addresses=127.0.0.1/#org.ops4j.pax.web.listening.addresses=127.0.0.1/g' /etc/opencast/custom.properties
+#copy startscript
+COPY startOpencast.sh /opt/opencast/
 
+
+#Compile Opencast
+RUN chown -R opencast:opencast /opt/opencast
 #Port 8080
 EXPOSE 8080
+EXPOSE 61616
+
+ENTRYPOINT /opt/opencast/startOpencast.sh
