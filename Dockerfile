@@ -6,48 +6,59 @@
 
 
 # Set the base image to centos
-FROM centos:latest
+FROM debian:latest
 
 # File Author / Maintainer
 MAINTAINER Christian Greweling
 
 #Create a dedicated Opencast user.
 RUN useradd -d /home/opencast opencast
+
+RUN echo "deb http://ftp.debian.org/debian stretch-backports main" | tee /etc/apt/sources.list.d/stretch-backports.list
+
+RUN apt-get update
+
+RUN apt-get install -y -t \
+    stretch-backports \
+    openjdk-8-jre
+
 #Install some Packages
-RUN yum install -y \
+RUN apt-get install -y \
   tar \
   curl \
   wget \
-  git
+  apt-transport-https \
+  ca-certificates \
+  gnupg \
+  gnupg1 \
+  gnupg2
 
 
-#Install Opencast
-RUN mkdir /opt/opencast
-WORKDIR /opt/opencast/
-RUN wget https://bitbucket.org/opencast-community/opencast/downloads/opencast-dist-allinone-3.3.tar.xz
-RUN tar -xf opencast-dist-allinone-3.3.tar.xz
 
+#Install Repo 
+WORKDIR /etc/apt/sources.list.d/
+RUN echo "deb https://[USERNAME]:[PASSWORD]@pkg.opencast.org/debian stable/" | tee /etc/apt/sources.list.d/opencast.list
+RUN wget -qO - https://pkg.opencast.org/gpgkeys/opencast-deb.key | apt-key add -
 
-RUN curl https://copr.fedorainfracloud.org/coprs/lkiesow/apache-activemq-dist/repo/epel-7/lkiesow-apache-activemq-dist-epel-7.repo -o /etc/yum.repos.d/lkiesow-apache-activemq-dist-epel-7.repo
+RUN apt-get update
 # Install Apache ActiveMQ
-RUN yum install -y activemq-dist
+RUN apt-get install -y activemq-dist
 
 
-RUN yum update --skip broken && yum -y install epel-release
-#ADD usr-sbin-matterhorn /usr/sbin/matterhorn
 
-RUN yum -y install \
+RUN apt-get -y install \
     bzip2 \
-    ffmpeg \
-    which \
+    ffmpeg-dist \
     activemq-dist \
-    apache-maven \
-    tesseract \
-    java-1.8.0-openjdk.x86_64 \
-    java-1.8.0-openjdk-devel.x86_64
+    tesseract-ocr \
+    hunspell \
+    openjdk-8-jre
 
-#ops
-RUN sed -i s/'org.ops4j.pax.web.listening.addresses'/'#org.ops4j.pax.web.listening.addresses'/ /opt/opencast/opencast-dist-allinone/etc/org.ops4j.pax.web.cfg
+RUN apt-get -y install opencast-4-allinone
+
+
+#Make Opencast accesible outsite of the image
+RUN sed -i s/'org.ops4j.pax.web.listening.addresses'/'#org.ops4j.pax.web.listening.addresses'/ /etc/opencast/org.ops4j.pax.web.cfg
 
 
 #copy startscript
@@ -60,4 +71,4 @@ RUN chown -R opencast:opencast /opt/opencast
 EXPOSE 8080
 EXPOSE 61616
 
-ENTRYPOINT /opt/opencast/startOpencast.sh
+#ENTRYPOINT /opt/opencast/startOpencast.sh

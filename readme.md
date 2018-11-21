@@ -10,10 +10,13 @@ edit Dockerfile
 change [your_username]:[password] to your own credentials for https://pkg.opencast.org/ .
 
 docker build -t opencast .
-docker run it --name=matterhorntest -p 8080:8080 opencast /bin/sh
+docker run it --name=opencasttest -p 8080:8080 opencast /bin/sh
 
 activemq start
-/usr/share/opencast/bin/start-opencast
+/etc/init.d/activemq start
+
+start opencast
+/etc/init.d/opencast start
 
 Open a browser:
 http://localhost:8080
